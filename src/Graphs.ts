@@ -1,11 +1,12 @@
 import PackageAgent from "./Agents/PackageAgent.js";
 import TravelPlacesAgent from "./Agents/TravelPlacesAgent.js";
 import {Runnable, RunnableConfig} from "@langchain/core/runnables";
-import {Annotation,  END,  START, StateGraph} from "@langchain/langgraph";
+import {Annotation, END, MemorySaver, START, StateGraph} from "@langchain/langgraph";
 import {BaseMessage, HumanMessage} from "@langchain/core/messages";
 // @ts-ignore
 import {AnnotationRoot} from "@langchain/langgraph/dist/graph";
 import SupervisorAgent from "./Agents/SupervisorAgent.js";
+import {getCheckPoint} from "./database/postgres/PostgressCheckPoint.js";
 
 
 export default class Graphs {
@@ -74,8 +75,11 @@ export default class Graphs {
         );
 
         workflow.addEdge(START, "supervisor");
-      //  const checkpointer = new MemorySaver();
-        return  workflow.compile();
+     //  const checkpointer = new MemorySaver();
+        return  workflow.compile({
+          //  store: getCheckPoint,
+            checkpointer: getCheckPoint,
+        });
     }
 
 }

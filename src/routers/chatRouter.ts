@@ -1,52 +1,59 @@
-import {Request, Response, Router} from 'express';
-import AgentService from "../Services/AgentsService.js";
+import { Request, Response, Router } from 'express';
+import AgentService from '../Services/AgentsService.js'; // Adjust if you use .ts instead of .js
+import httpUtils from './httputils.js';
 
 export default class ChatController {
-
-    public router: Router      // Express router instance
+    // Instead of a separate field declaration, it's common to declare and initialize together.
+    public router: Router = Router();
 
     constructor() {
-        this.router = Router();      // Express router instance
         this.initializeRoutes();
     }
 
-    public async PostPrompt(req: Request, res: Response): Promise<void> {
-        const {prompt} = req.body
-
-        res.setHeader('Content-Type', 'application/json');
-        res.setHeader('Transfer-Encoding', 'chunked');
-
-        let conversationID = req.get('Conversation-ID')
-
-        const response = await AgentService.GetAIResponseStreaming(prompt, conversationID)
+    /**
+     * POST handler for prompt streaming.
+     * - Renamed to `postPrompt` (lowerCamelCase) to follow typical method naming conventions in JS/TS.
+     * - Defined as an arrow function so it retains the `this` context automatically
+     *   (important when passing to `this.router.post`).
+     */
+    public postPrompt = async (req: Request, res: Response): Promise<void> => {
         try {
-            // Iterate over your async iterable and write each chunk
-            for await (const chunk of response) {
-                // Convert your chunk to JSON and add a newline
-                const jsonChunk = JSON.stringify(chunk) + "\n";
+            // Destructure `prompt` from the request body (type definition can be improved if you have a specific DTO)
+            const { prompt } = req.body;
+            const conversationId = httpUtils.GetConversationIDbyReq(req); // Use camelCase if possible: getConversationIdByReq
+
+            res.setHeader('Content-Type', 'application/json');
+            res.setHeader('Transfer-Encoding', 'chunked');
+            res.setHeader('Conversation-ID',conversationId)
+            // Get the async iterable for AI response streaming
+            const aiResponseIterable = await AgentService.GetAIResponseStreaming(prompt, conversationId);
+
+            // Stream each chunk to the client
+            for await (const chunk of aiResponseIterable) {
+                const jsonChunk = JSON.stringify(chunk) + '\n';
                 res.write(jsonChunk);
 
-                if (!chunk?.__end__) {
+                // Example logging (remove in production or handle more gracefully)
+                if (true /*!chunk?.__end__*/) {
                     console.log(chunk);
-                    console.log("----");
+                    console.log('----');
                 }
             }
-        } catch (err) {
-            console.error('Error while streaming:', err);
-            res.status(500).end();
-            return;
-        }
-        res.end();
 
-    }
+            // End the response once the streaming finishes
+            res.end();
+
+        } catch (error) {
+            console.error('Error while streaming:', error);
+            res.status(500).end();
+        }
+    };
 
     /**
-     * Define the routes handled by this controller.
+     * Define routes handled by this controller.
      */
     private initializeRoutes(): void {
-        // POST /users
-        this.router.post("/", this.PostPrompt);
+        // For clarity, we bind the postPrompt handler to the POST / route
+        this.router.post('/', this.postPrompt);
     }
 }
-
-

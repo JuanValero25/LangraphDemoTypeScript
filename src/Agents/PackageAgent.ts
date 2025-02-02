@@ -39,7 +39,7 @@ export default class PackageAgent {
             llm,
             tools: agentTools,
             stateModifier: new SystemMessage(this.initialPromt),
-         //   checkpointSaver:getCheckPoint
+            checkpointSaver:getCheckPoint
         })
 
     }

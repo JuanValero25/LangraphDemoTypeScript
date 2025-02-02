@@ -3,6 +3,7 @@ import {createReactAgent} from "@langchain/langgraph/prebuilt";
 import {SystemMessage} from "@langchain/core/messages";
 import {CompiledStateGraph} from "@langchain/langgraph";
 import LLMInitialization from "../LLMInitialization.js";
+import {getCheckPoint} from "../database/postgres/PostgressCheckPoint.js";
 
 export default class TravelPlacesAgent {
 
@@ -29,7 +30,7 @@ export default class TravelPlacesAgent {
             llm,
             tools: agentTools,
             stateModifier: new SystemMessage(this.initialPromt),
-        //    checkpointSaver:getCheckPoint
+            checkpointSaver:getCheckPoint
         })
 
     }
