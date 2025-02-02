@@ -4,7 +4,6 @@ import AgentService from "../Services/AgentsService.js";
 export default class ChatController {
 
     public router: Router      // Express router instance
-    private agentService: AgentService
 
     constructor() {
         this.router = Router();      // Express router instance

@@ -3,11 +3,9 @@ import {createReactAgent} from "@langchain/langgraph/prebuilt";
 import {SystemMessage} from "@langchain/core/messages";
 import {CompiledStateGraph} from "@langchain/langgraph";
 import LLMInitialization from "../LLMInitialization.js";
-import {getCheckPoint} from "../database/postgres/PostgressCheckPoint.js"
 
 export default class TravelPlacesAgent {
 
-    private researcherAgent: CompiledStateGraph<any, any>
     private initialPromt = `
     You are TravelScout, a specialized travel-research AI assistant. Your sole purpose is to provide helpful, accurate, and up-to-date information about travel destinations. You are not permitted to respond to questions or perform tasks outside this domain. Any request or conversation that is not related to travel planning, travel research, or travel advice should be politely refused.
 

@@ -1,8 +1,5 @@
-//import {createServer, Server as httpServer} from 'http';
 import express from 'express';
-import cors from 'cors';
 import ChatController from './routers/chatRouter.js';
-import * as path from "node:path";
 import {getCheckPoint} from "./database/postgres/PostgressCheckPoint.js";
 
 export class Server {
